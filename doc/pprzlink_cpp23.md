@@ -1,0 +1,123 @@
+# Try the C++23 pprzlink branch
+
+This branch publishes the C++ library work in
+[alex31/pprzlink, FEATURE/ivycpp_native](https://github.com/alex31/pprzlink/tree/FEATURE/ivycpp_native).
+Paparazzi pins its exact commit as the sw/ext/pprzlink submodule and uses the
+fork's HTTPS URL, so collaborators can fetch it without write access.
+
+The library uses Ivy's native C++23 wrapper, typed field storage and concepts,
+complete serial writes, and exclusive ownership of transport devices.
+It also provides an XBee 802.15.4 AP=1 transport with checked AT initialization,
+automatic baud discovery (target 57600 by default), verified baud persistence,
+and optional validation before sending a binary frame.
+
+The serial_messages executable is a diagnostic example, not a complete
+replacement for Paparazzi's OCaml link process. Transport selection is an
+application option; the messages XML describes message fields.
+
+## Get the source
+
+For this C++ library, only the pprzlink submodule is required:
+
+```sh
+git clone --branch FEATURE/ivycpp_native \
+  --recurse-submodules=sw/ext/pprzlink \
+  https://github.com/alex31/paparazzi.git
+cd paparazzi
+```
+
+In an existing checkout, after fetching and checking out the branch:
+
+```sh
+git submodule sync -- sw/ext/pprzlink
+git submodule update --init sw/ext/pprzlink
+```
+
+To work on the rest of Paparazzi, initialize its other submodules with
+`git submodule update --init --recursive` and follow the normal Paparazzi
+installation instructions. The submodule is normally checked out at a detached
+commit: do not update it to its default master branch to build this feature.
+
+## Install Ivy and the C++ build dependencies
+
+Ubuntu 24.04 / GCC 13 is the intended minimum; it has not yet been tested.
+Validation was performed on Ubuntu 26.04.1 with GCC 15 and Clang 22.
+Ubuntu 22.04 is not supported by this branch.
+
+Use Ivy **3.18.3**, including its C++23 wrapper. The exact tested source is
+[alex31/libivy-c at b0bf831702c5bfd1313e83ded62eb14d17198534](https://github.com/alex31/libivy-c/commit/b0bf831702c5bfd1313e83ded62eb14d17198534),
+on branch FEATURE/cpp_wrapper. Ivy is installed separately, not vendored into
+Paparazzi or pprzlink. The old pprzlink ivy-c++ directory has been removed.
+
+Install the library/test dependencies and the Ivy package build dependencies:
+
+```sh
+sudo apt-get install build-essential cmake pkg-config python3 \
+  libboost-dev libtinyxml2-dev debhelper libxt-dev libx11-dev tcl-dev \
+  libglib2.0-dev libpcre2-dev libreadline-dev doxygen graphviz \
+  texlive-latex-base texlive-latex-recommended texlive-latex-extra \
+  texlive-plain-generic texlive-fonts-recommended poppler-utils
+```
+
+Build the Ivy packages on the target machine. This also builds their PDF
+reference. In a separate directory from the Paparazzi checkout:
+
+```sh
+git clone --branch FEATURE/cpp_wrapper https://github.com/alex31/libivy-c.git
+cd libivy-c
+git checkout b0bf831702c5bfd1313e83ded62eb14d17198534
+IVY_DEB_OUTPUT_DIR="$PWD/build/debian/3.18.3" sh debian/build.sh -j4
+python3 debian/check-packages.py build/debian/3.18.3
+sudo apt-get --no-remove install \
+  "$PWD/build/debian/3.18.3/ivy-c_3.18.3_$(dpkg --print-architecture).deb" \
+  "$PWD/build/debian/3.18.3/ivy-c-dev_3.18.3_$(dpkg --print-architecture).deb"
+pkg-config --modversion ivy-c ivy-cpp
+```
+
+Both pkg-config queries should report 3.18.3. If using a private Ivy prefix,
+set PKG_CONFIG_PATH and LD_LIBRARY_PATH as documented in the pprzlink README.
+Do not mix headers and runtime libraries from different Ivy installations.
+Prebuilt Ubuntu 26 packages are not a substitute for a target-platform build.
+
+## Build and test pprzlink
+
+From the Paparazzi root:
+
+```sh
+cmake -S sw/ext/pprzlink/lib/v2.0/C++ -B build/pprzlink-cpp \
+  -DCMAKE_BUILD_TYPE=Debug
+cmake --build build/pprzlink-cpp -j4
+ctest --test-dir build/pprzlink-cpp --output-on-failure
+./build/pprzlink-cpp/serial_messages --help
+```
+
+The 12 tests run without a physical radio. They include Ivy loopback communication
+and serial/XBee emulation through pseudo-terminals. The runtime must permit
+loopback UDP/TCP sockets and pseudo-terminal creation.
+
+For a compatible 802.15.4 modem on /dev/ttyUSB0:
+
+```sh
+./build/pprzlink-cpp/serial_messages \
+  -messages sw/ext/pprzlink/message_definitions/v1.0/messages.xml \
+  -d /dev/ttyUSB0 -transport xbee -xbeesan
+```
+
+Autobaud is enabled automatically and targets 57600 baud; -s selects another
+supported target. A changed rate is checked before ATWR saves it. ATWR also saves
+the modem's other existing parameters, before this initializer changes MY/CH/AP.
+Initialization errors block binary sends and are printed on stderr.
+Physical XBee behavior, including persistence after a power cycle, still needs
+hardware validation. Only legacy 802.15.4 AP=1 framing is supported.
+
+## Review and integration
+
+See the [C++ README](https://github.com/alex31/pprzlink/blob/756d00d1a88f8b7ad0a2c2a8ac6e98bf6fca34e6/lib/v2.0/C%2B%2B/README.md) for the library API,
+migration instructions, transport formats and examples, and
+[the validation report](https://github.com/alex31/pprzlink/blob/756d00d1a88f8b7ad0a2c2a8ac6e98bf6fca34e6/lib/v2.0/C%2B%2B/pprzlink/VALIDATION_CLANG22.md)
+for test coverage and limitations. Downstream C++ applications must be adapted
+to the changed APIs and rebuilt.
+
+The Paparazzi commit updates the submodule URL, pinned commit and this guide.
+The full Paparazzi application and aircraft firmware have not been validated by
+the C++ library test suite.
