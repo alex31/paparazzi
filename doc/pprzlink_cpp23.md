@@ -11,9 +11,13 @@ It also provides an XBee 802.15.4 AP=1 transport with checked AT initialization,
 automatic baud discovery (target 57600 by default), verified baud persistence,
 and optional validation before sending a binary frame.
 
-The serial_messages executable is a diagnostic example, not a complete
-replacement for Paparazzi's OCaml link process. Transport selection is an
-application option; the messages XML describes message fields.
+The serial_messages executable is a diagnostic example. The new link++
+ground agent implements the OCaml link's CLI, routing and supervision. Its
+source and differential tests live in the pprzlink submodule.
+See [the implementation and comparison report](../sw/ext/pprzlink/lib/v2.0/C++/LINK_CPP_VALIDATION.md)
+for build-time selection with LINK_IMPL=cpp and the documented differences.
+The [public API examples](../sw/ext/pprzlink/lib/v2.0/C++/API_USAGE.md) cover scoped Ivy subscriptions, checked numeric conversions and serial/UDP clients.
+The core and I/O components can be used without Ivy.
 
 ## Get the source
 
@@ -40,8 +44,9 @@ commit: do not update it to its default master branch to build this feature.
 
 ## Install Ivy and the C++ build dependencies
 
-Ubuntu 24.04 / GCC 13 is the intended minimum; it has not yet been tested.
-Validation was performed on Ubuntu 26.04.1 with GCC 15 and Clang 22.
+Ubuntu 24.04 / GCC 13 is the validated minimum: GCC 13.3 builds the library
+and agent and passes the tests, including comparison with the real OCaml link.
+Earlier validation was performed on Ubuntu 26.04.1 with GCC 15 and Clang 22.
 Ubuntu 22.04 is not supported by this branch.
 
 Use Ivy **3.18.3**, including its C++23 wrapper. The exact tested source is
@@ -91,7 +96,7 @@ ctest --test-dir build/pprzlink-cpp --output-on-failure
 ./build/pprzlink-cpp/serial_messages --help
 ```
 
-The 12 tests run without a physical radio. They include Ivy loopback communication
+The default build now runs 19 tests without a physical radio. They include Ivy loopback communication
 and serial/XBee emulation through pseudo-terminals. The runtime must permit
 loopback UDP/TCP sockets and pseudo-terminal creation.
 

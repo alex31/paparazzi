@@ -46,7 +46,7 @@ endif
 opt: server.opt
 
 clean:
-	$(Q)rm -f link server messages *.bak *~ core *.o .depend *.opt *.out *.cm* ivy_tcp_aircraft ivy_tcp_controller ivy2udp ivy2serial ivy_serial_bridge gpsd2ivy c_ivy_client_example_1 c_ivy_client_example_2 ivy2nmea
+	$(Q)rm -f link link++ link_ocaml server messages *.bak *~ core *.o .depend *.opt *.out *.cm* ivy_tcp_aircraft ivy_tcp_controller ivy2udp ivy2serial ivy_serial_bridge gpsd2ivy c_ivy_client_example_1 c_ivy_client_example_2 ivy2nmea
 
 messages : messages.cmo $(LIBPPRZCMA) $(LIBPPRZLINKCMA)
 	@echo OL $@
@@ -60,9 +60,28 @@ server.opt :  $(SERVERCMX) $(LIBPPRZCMXA) $(LIBPPRZLINKCMXA)
 	@echo OOL $@
 	$(Q)$(OCAMLOPT) $(INCLUDES) -o $@ -package glibivy,pprz -linkpkg $(SERVERCMX)
 
-link : link.cmo $(LIBPPRZCMA) $(LIBPPRZLINKCMA)
+# Keep existing launch commands; choose the implementation at build time.
+LINK_IMPL ?= ocaml
+include link_cpp.mk
+
+ifeq ($(LINK_IMPL),cpp)
+link: link++ FORCE_LINK
+	$(Q)cp "$(CPP_LINK_OUTPUT)" $@
+else ifeq ($(LINK_IMPL),ocaml)
+link: link.cmo $(LIBPPRZCMA) $(LIBPPRZLINKCMA) FORCE_LINK
 	@echo OL $@
 	$(Q)$(OCAMLC) $(INCLUDES) -o $@ $(LINKPKG) $<
+else
+$(error LINK_IMPL must be ocaml or cpp)
+endif
+
+# Build a separate reference binary when both implementations are needed.
+link_ocaml: link.cmo $(LIBPPRZCMA) $(LIBPPRZLINKCMA)
+	@echo OL $@
+	$(Q)$(OCAMLC) $(INCLUDES) -o $@ $(LINKPKG) $<
+
+.PHONY: FORCE_LINK
+FORCE_LINK:
 
 
 ivy_tcp_aircraft : ivy_tcp_aircraft.cmo $(LIBPPRZCMA) $(LIBPPRZLINKCMA)
@@ -147,6 +166,11 @@ c_ivy_client_example_2: c_ivy_client_example_2.c Makefile
 	@echo DEPEND $@
 	$(Q)$(OCAMLDEP) -I $(LIBPPRZDIR) *.ml* > .depend
 
+# Building only the C++ agent does not require the OCaml dependency scanner.
+ifneq ($(MAKECMDGOALS),link++)
+ifneq ($(LINK_IMPL):$(MAKECMDGOALS),cpp:link)
 ifneq ($(MAKECMDGOALS),clean)
 -include .depend
+endif
+endif
 endif
