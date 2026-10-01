@@ -66,3 +66,6 @@ clean:
 	$(Q)rm -r $(PAPARAZZI_SRC)/var/include/DSDLcode
 
 .PHONY: all clean pydronecan dronecan dronecan_dsdlc.build DSDL libcanard
+
+# Submodule sync and update modify the same Git configuration files.
+.NOTPARALLEL:

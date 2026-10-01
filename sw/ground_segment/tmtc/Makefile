@@ -37,7 +37,8 @@ XLINKPKG = $(XPKG) -linkpkg -dllpath-pkg pprz.xlib,pprzlink,$(USE_LABELGTK)
 SERVERCMO = server_globals.cmo aircraft_server.cmo wind.cmo airprox.cmo kml.cmo parse_messages_v1.ml intruder.cmo server.cmo
 SERVERCMX = $(SERVERCMO:.cmo=.cmx)
 
-all: link server ivy_tcp_aircraft ivy_tcp_controller ivy2udp ivy2serial ivy2nmea gpsd2ivy gtk_tools
+# Build both link implementations; LINK_IMPL selects the executable named link.
+all: link link++ server ivy_tcp_aircraft ivy_tcp_controller ivy2udp ivy2serial ivy2nmea gpsd2ivy gtk_tools
 
 ifeq ($(USE_LABELGTK),lablgtk2)
 gtk_tools: messages

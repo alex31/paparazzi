@@ -107,6 +107,7 @@ Cargo.lock
 /sw/ground_segment/tmtc/messages
 /sw/ground_segment/tmtc/ivy_tcp_controller
 /sw/ground_segment/tmtc/link
+/sw/ground_segment/tmtc/link++
 /sw/ground_segment/tmtc/broadcaster
 /sw/ground_segment/tmtc/dia
 /sw/ground_segment/tmtc/ivy2udp
