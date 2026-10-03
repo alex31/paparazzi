@@ -21,7 +21,7 @@ The core and I/O components can be used without Ivy.
 
 ## Get the source
 
-For this C++ library, only the pprzlink submodule is required:
+For this C++ library, initialize pprzlink and its pinned LLNL/units dependency recursively:
 
 ```sh
 git clone --branch FEATURE/ivycpp_native \
@@ -33,14 +33,18 @@ cd paparazzi
 In an existing checkout, after fetching and checking out the branch:
 
 ```sh
-git submodule sync -- sw/ext/pprzlink
-git submodule update --init sw/ext/pprzlink
+git submodule sync --recursive -- sw/ext/pprzlink
+git submodule update --init --recursive sw/ext/pprzlink
 ```
 
 To work on the rest of Paparazzi, initialize its other submodules with
 `git submodule update --init --recursive` and follow the normal Paparazzi
 installation instructions. The submodule is normally checked out at a detached
 commit: do not update it to its default master branch to build this feature.
+
+LLNL/units is built automatically from `sw/ext/pprzlink/third_party/llnl_units`
+and installed with the C++ SDK. Paparazzi's normal `make` already runs the
+recursive pprzlink submodule update; no separate LLNL installation is needed.
 
 ## Install Ivy and the C++ build dependencies
 
