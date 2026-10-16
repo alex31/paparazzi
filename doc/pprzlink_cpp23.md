@@ -125,15 +125,16 @@ The option configures and verifies both the host serial port and the modem's
 The selected baudrate stays fixed and is not saved to flash. The same `-hfc`
 argument can be added to the link++ launch command in Paparazzi Center.
 
-Each message can declare `radio_retry="true"` or `radio_retry="false"` on its
-`<message>` element in the loaded XML. The agent uses
-`RadioRetries::FromDefinition`: a missing attribute preserves the existing
-retry behavior. A false value disables radio ACK/retries and host resends
-after a radio failure. A true or missing value allows host resends up to
+The existing XML `link` attribute selects `forwarded` unicast or `broadcasted`
+radio delivery. Broadcast requests no MAC ACK; the application's `ac_id` field
+is preserved for filtering by targeted command handlers in the autopilot.
+The agent never resends broadcasts. Unicast can be retried up to
 `-xbee_retries` (default 10 total attempts, including the first transmission).
 Transmit status tracking remains enabled in either case; a missing status
-does not trigger a blind resend. Restart the agent after changing the XML,
-and check `$PAPARAZZI_HOME/var/messages.xml` when using a generated catalogue.
+never triggers a blind resend. The modem's global `RR` setting can still cause
+broadcast repetitions on some 802.15.4 firmware and is left unchanged.
+Restart the agent after changing the XML, and check
+`$PAPARAZZI_HOME/var/messages.xml` when using a generated catalogue.
 See [the pprzlink guide](../sw/ext/pprzlink/doc/cpp/guide_d_utilisation.md#utiliser-link-avec-une-radio-xbee)
 for the complete policy and standalone build instructions.
 
