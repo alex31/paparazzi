@@ -14,9 +14,9 @@ and optional validation before sending a binary frame.
 The serial_messages executable is a diagnostic example. The new link++
 ground agent implements the OCaml link's CLI, routing and supervision. Its
 source and differential tests live in the pprzlink submodule.
-See [the implementation and comparison report](../sw/ext/pprzlink/lib/v2.0/C++/LINK_CPP_VALIDATION.md)
+See [the implementation and comparison report](../sw/ext/pprzlink/doc/cpp/validation/LINK_CPP_VALIDATION.md)
 for build-time selection with LINK_IMPL=cpp and the documented differences.
-The [public API examples](../sw/ext/pprzlink/lib/v2.0/C++/API_USAGE.md) cover scoped Ivy subscriptions, checked numeric conversions and serial/UDP clients.
+The [public API examples](../sw/ext/pprzlink/doc/cpp/API_USAGE.md) cover scoped Ivy subscriptions, checked numeric conversions and serial/UDP clients.
 The core and I/O components can be used without Ivy.
 
 ## Get the source
@@ -134,7 +134,7 @@ after a radio failure. A true or missing value allows host resends up to
 Transmit status tracking remains enabled in either case; a missing status
 does not trigger a blind resend. Restart the agent after changing the XML,
 and check `$PAPARAZZI_HOME/var/messages.xml` when using a generated catalogue.
-See [the pprzlink guide](../sw/ext/pprzlink/lib/v2.0/C++/guide_d_utilisation.md#utiliser-link-avec-une-radio-xbee)
+See [the pprzlink guide](../sw/ext/pprzlink/doc/cpp/guide_d_utilisation.md#utiliser-link-avec-une-radio-xbee)
 for the complete policy and standalone build instructions.
 
 For a virtual serial connection on Linux, let `link++` manage socat:
@@ -185,9 +185,9 @@ hardware validation. Only legacy 802.15.4 AP=1 framing is supported.
 
 ## Review and integration
 
-See the [C++ README](https://github.com/alex31/pprzlink/blob/756d00d1a88f8b7ad0a2c2a8ac6e98bf6fca34e6/lib/v2.0/C%2B%2B/README.md) for the library API,
+See the [C++ reference](../sw/ext/pprzlink/doc/cpp/reference.md) for the library API,
 migration instructions, transport formats and examples, and
-[the validation report](https://github.com/alex31/pprzlink/blob/756d00d1a88f8b7ad0a2c2a8ac6e98bf6fca34e6/lib/v2.0/C%2B%2B/pprzlink/VALIDATION_CLANG22.md)
+[the validation report](../sw/ext/pprzlink/doc/cpp/validation/VALIDATION_CLANG22.md)
 for test coverage and limitations. Downstream C++ applications must be adapted
 to the changed APIs and rebuilt.
 
