@@ -1,7 +1,8 @@
 # C++ link can also be built with: make -f link_cpp.mk PAPARAZZI_SRC=/path/to/paparazzi
 # Its source lives beside the reusable library, so the same standalone CMake
 # project supplies the agent, tests, installation and compiler checks.
-PPRZLINK_CXX ?= g++-13
+# Use the system toolchain alongside the locally installed Ivy libraries.
+PPRZLINK_CXX ?= g++
 PPRZLINK_CPP_BUILD ?= $(PAPARAZZI_SRC)/var/build/pprzlink-cpp
 PPRZLINK_CMAKE_OPTIONS ?=
 CPP_LINK_OUTPUT ?= link++
